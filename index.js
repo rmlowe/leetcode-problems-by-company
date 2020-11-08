@@ -86,13 +86,6 @@ async function getProblemCounts(slug) {
     })
         .then(response => response.json());
 
-    const counts = {};
-
-    for (const { frequencyTimePeriod } of data.companyTag.questions) {
-        const oldCount = counts[frequencyTimePeriod] || 0;
-        counts[frequencyTimePeriod] = oldCount + 1;
-    }
-
     const questionCountByFrequencyTimePeriod = frequencyTimePeriod =>
         data.companyTag.questions.filter(question => question.frequencyTimePeriod <= frequencyTimePeriod).length;
 
