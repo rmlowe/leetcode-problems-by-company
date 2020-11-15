@@ -11,7 +11,3 @@ runtime.onInstalled.addListener(() => {
             actions: [new declarativeContent.ShowPageAction()]
         }]));
 });
-
-//chrome.pageAction.onClicked.addListener(tab => chrome.tabs.executeScript(tab.id, { file: 'content.js' }));
-
-//runtime.onMessage.addListener((request, sender, sendResponse) => console.log(request));

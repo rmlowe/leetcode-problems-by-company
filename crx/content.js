@@ -1,9 +1,12 @@
 (() => {
-    const companies = Array.from(document.querySelectorAll('.lg-company,.sm-company')).map(a => ({
-        slug: a.href.split('/')[4],
-        Company: a.querySelector('.text-gray').textContent.trim(),
-        'All time': parseInt(a.querySelector('.badge').textContent, 10)
-    }));
+    const companies = {};
+
+    for (const a of document.querySelectorAll('.lg-company,.sm-company')) {
+        companies[a.href.split('/')[4]] = {
+            Company: a.querySelector('.text-gray').textContent.trim(),
+            'All time': parseInt(a.querySelector('.badge').textContent, 10)
+        };
+    }
 
     const csrftoken = document.cookie
         .split('; ')
@@ -72,7 +75,30 @@ fragment questionFields on QuestionNode {
 }
 `;
 
-    async function getProblemCounts(slug) {
+    const compareFunction = (c1, c2) => {
+        for (const key of ['6 months', '1 year', '2 years', 'All time']) {
+            const v1 = c1[key];
+            const v2 = c2[key];
+
+            if (v1 !== undefined && v2 !== undefined) {
+                const diff = v2 - v1;
+
+                if (diff !== 0) {
+                    return diff;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    const sendUpdate = () => {
+        const message = Object.values(companies);
+        message.sort(compareFunction);
+        chrome.runtime.sendMessage(message);
+    };
+
+    async function updateProblemCounts(slug) {
         const value = {
             operationName: 'getCompanyTag',
             query,
@@ -94,23 +120,20 @@ fragment questionFields on QuestionNode {
         const questionCountByFrequencyTimePeriod = frequencyTimePeriod =>
             data.companyTag.questions.filter(question => question.frequencyTimePeriod <= frequencyTimePeriod).length;
 
-        return {
-            companyName: data.companyTag.name, counts: {
-                '6 months': questionCountByFrequencyTimePeriod(1),
-                '1 year': questionCountByFrequencyTimePeriod(2),
-                '2 years': questionCountByFrequencyTimePeriod(3),
-                'All time': questionCountByFrequencyTimePeriod(4)
-            }
+        companies[slug] = {
+            Company: data.companyTag.name,
+            '6 months': questionCountByFrequencyTimePeriod(1),
+            '1 year': questionCountByFrequencyTimePeriod(2),
+            '2 years': questionCountByFrequencyTimePeriod(3),
+            'All time': questionCountByFrequencyTimePeriod(4)
         };
+
+        sendUpdate();
     }
 
-    async function getData(end) {
-        const data = await Promise.all(slugs.slice(0, 10).map(getProblemCounts));
-        const lines = data.map(company =>
-            `${company.companyName},${company.counts['6 months']},${company.counts['1 year']},${company.counts['2 years']},${company.counts['All time']}`);
-        return ['Company,6 months,1 year,2 years,All time', ...lines].join('\r\n');
-    }
+    sendUpdate();
 
-    // getData(10).then(result => console.log(result));
-    chrome.runtime.sendMessage(companies);
+    for (const slug of Object.keys(companies)) {
+        updateProblemCounts(slug);
+    }
 })();
