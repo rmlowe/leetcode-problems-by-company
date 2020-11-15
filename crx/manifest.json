@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+    "name": "LeetCode problem counts by company",
+    "version": "0.1",
+    "description": "When activated, compiles problem counts by company from https://leetcode.com/problemset/all/",
+    "icons": {
+        "16": "icons/favicon-16x16.png",
+        "32": "icons/favicon-32x32.png",
+        "96": "icons/favicon-96x96.png",
+        "160": "icons/favicon-160x160.png",
+        "192": "icons/favicon-192x192.png"
+    },
+    "page_action": {
+        "default_icon": {
+            "16": "icons/favicon-16x16.png",
+            "32": "icons/favicon-32x32.png",
+            "96": "icons/favicon-96x96.png",
+            "160": "icons/favicon-160x160.png",
+            "192": "icons/favicon-192x192.png"
+        },
+        "default_title": "Compile problem counts",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "permissions": ["activeTab", "declarativeContent"]
+}
