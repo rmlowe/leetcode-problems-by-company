@@ -9,12 +9,15 @@
     };
   }
 
-  // // For new version
-  // for (const a of document.querySelectorAll('.swiper-slide a.mb-4')) {
-  //   companies[a.href.split('/')[4]] = {};
-  // }
+  // For new version
+  for (const a of document.querySelectorAll('.swiper-slide a.mb-4')) {
+    companies[a.href.split('/')[4]] = {
+      Company: a.querySelector('span span:first-child').textContent,
+      'All time': parseInt(a.querySelector('span span:last-child').textContent, 10)
+    };
+  }
 
-  // console.log(companies);
+  console.log(companies);
 
   const csrftoken = document.cookie
     .split('; ')
