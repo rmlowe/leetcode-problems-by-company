@@ -1,5 +1,5 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "LeetCode problem counts by company",
     "version": "0.1",
     "description": "When activated, compiles problem counts by company from https://leetcode.com/problemset/all/",
@@ -10,7 +10,7 @@
         "160": "icons/favicon-160x160.png",
         "192": "icons/favicon-192x192.png"
     },
-    "page_action": {
+    "action": {
         "default_icon": {
             "16": "icons/favicon-16x16.png",
             "32": "icons/favicon-32x32.png",
@@ -22,8 +22,7 @@
         "default_popup": "popup.html"
     },
     "background": {
-        "scripts": ["background.js"],
-        "persistent": false
+        "service_worker": "background.js"
     },
-    "permissions": ["activeTab", "declarativeContent"]
+    "permissions": ["activeTab", "declarativeContent", "scripting"]
 }

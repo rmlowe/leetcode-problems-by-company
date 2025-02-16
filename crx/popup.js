@@ -1,5 +1,5 @@
 chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    chrome.tabs.executeScript(tabs[0].id, { file: 'content.js' });
+    chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, files: ['content.js'] });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
