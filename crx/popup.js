@@ -4,11 +4,12 @@ chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const columns = [
-        { key: 'Company', numeric: false },
-        { key: '6 months', numeric: true },
-        { key: '1 year', numeric: true },
-        { key: '2 years', numeric: true },
-        { key: 'All time', numeric: true }
+        { displayName: 'Company', key: 'display-name', numeric: false },
+        { displayName: '30 days', key: 'thirty-days', numeric: true },
+        { displayName: '3 months', key: 'three-months', numeric: true },
+        { displayName: '6 months', key: 'six-months', numeric: true },
+        { displayName: 'More than 6 months', key: 'more-than-six-months', numeric: true },
+        { displayName: 'All', key: 'all', numeric: true }
     ];
     const element = (tagName, nodes, className) => {
         const result = document.createElement(tagName);
@@ -20,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const table = document.querySelector('table');
     table.innerHTML = '';
     table.append(
-        element('thead', [element('tr', columns.map(column => element('th', [column.key], className(column))))]),
+        element('thead', [element('tr', columns.map(column => element('th', [column.displayName], className(column))))]),
         element('tbody', request.map(company =>
             element('tr', columns.map(column => {
                 const value = company[column.key];
