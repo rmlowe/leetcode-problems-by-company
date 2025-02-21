@@ -126,11 +126,9 @@
     return json.data.favoriteQuestionList.totalLength;
   }
 
-  const periods = ['thirty-days', 'three-months', 'six-months', 'more-than-six-months', 'all']
-
   const compareFunction =
     (company1, company2) => {
-      for (const period of periods) {
+      for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months', 'all']) {
         const value1 = company1[period];
         const value2 = company2[period];
 
@@ -180,7 +178,7 @@
   sendUpdate();
 
   for (const company of Object.keys(companies)) {
-    for (const period of periods) {
+    for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months']) {
       updateProblemCounts(company, period);
     }
   }
