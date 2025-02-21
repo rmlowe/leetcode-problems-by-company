@@ -2,21 +2,21 @@
   // For old version
   const companiesFromOldVersion = Object.fromEntries(
     [...document.querySelectorAll('.lg-company,.sm-company')].map(a => [a.href.split('/')[4], {
-      'display-name': a.querySelector('.text-gray').textContent.trim(),
-      'all': parseInt(a.querySelector('.badge').textContent, 10),
+      'display-name': { value: a.querySelector('.text-gray').textContent.trim() },
+      'all': { value: parseInt(a.querySelector('.badge').textContent, 10) },
     }]));
   console.log(companiesFromOldVersion);
 
   // For new version
   const companiesFromNewVersion = Object.fromEntries(
     [...document.querySelectorAll('.swiper-slide a.mb-4')].map(a => [a.href.split('/')[4], {
-      'display-name': a.querySelector('span span:first-child').textContent,
-      'all': parseInt(a.querySelector('span span:last-child').textContent, 10)
+      'display-name': { value: a.querySelector('span span:first-child').textContent },
+      'all': { value: parseInt(a.querySelector('span span:last-child').textContent, 10) }
     }]));
   console.log(companiesFromNewVersion);
 
   const allCompanies = { ...companiesFromOldVersion, ...companiesFromNewVersion };
-  const companies = Object.fromEntries(Object.entries(allCompanies).slice(0, 10))
+  const companies = Object.fromEntries(Object.entries(allCompanies).slice(0, 500))
   console.log(companies);
   console.log(Object.keys(companies).length);
 
@@ -129,14 +129,19 @@
   const compareFunction =
     (company1, company2) => {
       for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months', 'all']) {
-        const value1 = company1[period];
-        const value2 = company2[period];
+        const obj1 = company1[period];
+        const obj2 = company2[period];
 
-        if (value1 !== undefined && value2 !== undefined) {
-          const diff = value2 - value1;
+        if (obj1 !== undefined && obj2 !== undefined) {
+          const value1 = obj1.value;
+          const value2 = obj2.value;
 
-          if (diff !== 0) {
-            return diff;
+          if (value1 !== undefined && value2 !== undefined) {
+            const diff = value2 - value1;
+
+            if (diff !== 0) {
+              return diff;
+            }
           }
         }
       }
@@ -157,7 +162,7 @@
 
   async function updateProblemCounts(company, period) {
     try {
-      companies[company][period] = await getQuestionCount(company, period)
+      companies[company][period] = { value: await getQuestionCount(company, period) };
 
       successes++;
 

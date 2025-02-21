@@ -20,7 +20,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         element('thead', [element('tr', columns.map(column => element('th', [column.displayName], 'text-center')))]),
         element('tbody', request.map(company =>
             element('tr', columns.map(column => {
-                const value = company[column.key];
+                const obj = company[column.key];
+
+                if (obj == undefined) {
+                    return element('td', "", "text-center");
+                }
+
+                const value = obj.value;
+
                 return element('td', [value === undefined ? "" : value], className(column));
             })))));
 });
