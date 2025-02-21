@@ -11,3 +11,11 @@ runtime.onInstalled.addListener(() => {
             actions: [new declarativeContent.ShowPageAction()]
         }]));
 });
+
+chrome.action.onClicked.addListener(() => {
+    chrome.tabs.create({ url: 'summary.html', active: false });
+
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, files: ['content.js'] });
+    });
+});

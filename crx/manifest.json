@@ -18,11 +18,11 @@
             "160": "icons/favicon-160x160.png",
             "192": "icons/favicon-192x192.png"
         },
-        "default_title": "Compile problem counts",
-        "default_popup": "popup.html"
+        "default_title": "Compile problem counts"
     },
     "background": {
         "service_worker": "background.js"
     },
-    "permissions": ["activeTab", "declarativeContent", "scripting"]
+    "permissions": ["activeTab", "declarativeContent", "scripting", "tabs"],
+    "host_permissions": ["<all_urls>"]
 }

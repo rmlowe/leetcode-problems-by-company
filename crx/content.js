@@ -16,7 +16,7 @@
   console.log(companiesFromNewVersion);
 
   const allCompanies = { ...companiesFromOldVersion, ...companiesFromNewVersion };
-  const companies = Object.fromEntries(Object.entries(allCompanies).slice(0, 500))
+  const companies = Object.fromEntries(Object.entries(allCompanies).slice(0, 10))
   console.log(companies);
   console.log(Object.keys(companies).length);
 

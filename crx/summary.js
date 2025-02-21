@@ -1,6 +1,6 @@
-chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, files: ['content.js'] });
-});
+// chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+//     chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, files: ['content.js'] });
+// });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const columns = [
@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const table = document.querySelector('table');
     table.innerHTML = '';
     table.append(
-        element('thead', [element('tr', columns.map(column => element('th', [column.displayName], className(column))))]),
+        element('thead', [element('tr', columns.map(column => element('th', [column.displayName], 'text-center')))]),
         element('tbody', request.map(company =>
             element('tr', columns.map(column => {
                 const value = company[column.key];
