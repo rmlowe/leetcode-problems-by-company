@@ -1,7 +1,3 @@
-// chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-//     chrome.scripting.executeScript({ target: { tabId: tabs[0].id }, files: ['content.js'] });
-// });
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const columns = [
         { displayName: 'Company', key: 'display-name', numeric: false },
