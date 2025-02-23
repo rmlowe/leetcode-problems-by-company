@@ -1,22 +1,17 @@
 (() => {
-  // For old version
-  const companiesFromOldVersion = Object.fromEntries(
-    [...document.querySelectorAll('.lg-company,.sm-company')].map(a => [a.href.split('/')[4], {
-      'display-name': { value: a.querySelector('.text-gray').textContent.trim() },
-      'all': { value: parseInt(a.querySelector('.badge').textContent, 10) },
-    }]));
-  console.log(companiesFromOldVersion);
+  const companies = Object.fromEntries(
+    [...document.querySelectorAll('.swiper-slide a.mb-4')].flatMap(a => {
+      const count = parseInt(a.querySelector('span span:last-child').textContent, 10);
 
-  // For new version
-  const companiesFromNewVersion = Object.fromEntries(
-    [...document.querySelectorAll('.swiper-slide a.mb-4')].map(a => [a.href.split('/')[4], {
-      'display-name': { value: a.querySelector('span span:first-child').textContent },
-      'all': { value: parseInt(a.querySelector('span span:last-child').textContent, 10) }
-    }]));
-  console.log(companiesFromNewVersion);
+      if (count <= 0) {
+        return [];
+      }
 
-  const allCompanies = { ...companiesFromOldVersion, ...companiesFromNewVersion };
-  const companies = Object.fromEntries(Object.entries(allCompanies).slice(0, 500))
+      return [[a.href.split('/')[4], {
+        'display-name': { value: a.querySelector('span span:first-child').textContent },
+        'all': { value: count }
+      }]];
+    }));
   console.log(companies);
   console.log(Object.keys(companies).length);
 
@@ -150,8 +145,6 @@
     }
 
   const sendUpdate = () => {
-    console.log(companies);
-
     const message = Object.values(companies);
     message.sort(compareFunction);
     chrome.runtime.sendMessage(message);
@@ -160,7 +153,7 @@
   let calls = 0;
   let successes = 0;
 
-  async function updateProblemCounts(company, period) {
+  async function updateProblemCounts(company, period, nextDelaySeconds) {
     try {
       companies[company][period] = { value: await getQuestionCount(company, period) };
 
@@ -169,7 +162,7 @@
       sendUpdate();
     } catch (ignore) {
       console.log(`Failed to fetch counts for ${company}, ${period}; retrying ...`);
-      updateProblemCounts(company, period);
+      updateProblemCountsAfterDelay(company, period, nextDelaySeconds, 2 * nextDelaySeconds);
     }
 
     calls++;
@@ -180,11 +173,23 @@
     console.log('success ratio: ', successes / calls);
   }
 
+  async function updateProblemCountsAfterDelay(company, period, delaySeconds, nextDelaySeconds) {
+    if (delaySeconds === 0) {
+      return updateProblemCounts(company, period, nextDelaySeconds);
+    }
+
+    companies[company][period] = { delaySeconds };
+
+    sendUpdate();
+
+    setTimeout(() => updateProblemCountsAfterDelay(company, period, delaySeconds - 1, nextDelaySeconds), 1000);
+  }
+
   sendUpdate();
 
   for (const company of Object.keys(companies)) {
     for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months']) {
-      updateProblemCounts(company, period);
+      updateProblemCounts(company, period, 5);
     }
   }
 })();

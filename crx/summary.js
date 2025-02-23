@@ -22,12 +22,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             element('tr', columns.map(column => {
                 const obj = company[column.key];
 
-                if (obj == undefined) {
+                if (obj === undefined) {
                     return element('td', "", "text-center");
                 }
 
                 const value = obj.value;
 
-                return element('td', [value === undefined ? "" : value], className(column));
+                if (value !== undefined) {
+                    return element('td', [value], className(column));
+                }
+
+                return element('td', [`Retrying in ${obj.delaySeconds}s`], 'text-center text-muted');
             })))));
 });
