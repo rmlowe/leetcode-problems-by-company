@@ -3,7 +3,7 @@
     [...document.querySelectorAll('.swiper-slide a.mb-4')].flatMap(a => {
       const count = parseInt(a.querySelector('span span:last-child').textContent, 10);
 
-      if (count <= 0) {
+      if (count < 3) {
         return [];
       }
 
@@ -174,13 +174,13 @@
   }
 
   async function updateProblemCountsAfterDelay(company, period, delaySeconds, nextDelaySeconds) {
-    if (delaySeconds === 0) {
-      return updateProblemCounts(company, period, nextDelaySeconds);
-    }
-
     companies[company][period] = { delaySeconds };
 
     sendUpdate();
+
+    if (delaySeconds === 0) {
+      return updateProblemCounts(company, period, nextDelaySeconds);
+    }
 
     setTimeout(() => updateProblemCountsAfterDelay(company, period, delaySeconds - 1, nextDelaySeconds), 1000);
   }
