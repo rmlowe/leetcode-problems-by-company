@@ -3,7 +3,7 @@
     [...document.querySelectorAll('.swiper-slide a.mb-4')].flatMap(a => {
       const count = parseInt(a.querySelector('span span:last-child').textContent, 10);
 
-      if (count < 3) {
+      if (count < 4) {
         return [];
       }
 
