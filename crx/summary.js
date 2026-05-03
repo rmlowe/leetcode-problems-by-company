@@ -1,3 +1,12 @@
+const retryText = retryAt =>
+    `Retrying in ${Math.max(0, Math.ceil((retryAt - Date.now()) / 1000))}s`;
+
+setInterval(() => {
+    for (const td of document.querySelectorAll('td[data-retry-at]')) {
+        td.textContent = retryText(parseInt(td.dataset.retryAt, 10));
+    }
+}, 250);
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const columns = [
         { displayName: 'Company', key: 'display-name', numeric: false },
@@ -7,9 +16,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { displayName: 'More than 6 months', key: 'more-than-six-months', numeric: true },
         { displayName: 'All', key: 'all', numeric: true }
     ];
-    const element = (tagName, nodes, className) => {
+    const element = (tagName, nodes, className, attrs) => {
         const result = document.createElement(tagName);
         result.className = className;
+        if (attrs) {
+            for (const [name, value] of Object.entries(attrs)) {
+                result.setAttribute(name, value);
+            }
+        }
         result.append(...nodes);
         return result;
     };
@@ -32,6 +46,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     return element('td', [value], className(column));
                 }
 
-                return element('td', [`Retrying in ${obj.delaySeconds}s`], 'text-center text-muted');
+                return element('td', [retryText(obj.retryAt)], 'text-center text-muted', { 'data-retry-at': obj.retryAt });
             })))));
 });

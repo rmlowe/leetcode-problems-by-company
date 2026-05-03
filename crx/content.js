@@ -162,7 +162,7 @@
       sendUpdate();
     } catch (ignore) {
       console.log(`Failed to fetch counts for ${company}, ${period}; retrying ...`);
-      updateProblemCountsAfterDelay(company, period, nextDelaySeconds, 2 * nextDelaySeconds);
+      scheduleRetry(company, period, nextDelaySeconds);
     }
 
     calls++;
@@ -173,16 +173,12 @@
     console.log('success ratio: ', successes / calls);
   }
 
-  async function updateProblemCountsAfterDelay(company, period, delaySeconds, nextDelaySeconds) {
-    companies[company][period] = { delaySeconds };
+  function scheduleRetry(company, period, delaySeconds) {
+    companies[company][period] = { retryAt: Date.now() + delaySeconds * 1000 };
 
     sendUpdate();
 
-    if (delaySeconds === 0) {
-      return updateProblemCounts(company, period, nextDelaySeconds);
-    }
-
-    setTimeout(() => updateProblemCountsAfterDelay(company, period, delaySeconds - 1, nextDelaySeconds), 1000);
+    setTimeout(() => updateProblemCounts(company, period, 2 * delaySeconds), delaySeconds * 1000);
   }
 
   sendUpdate();
