@@ -1,5 +1,19 @@
+const formatDuration = totalSeconds => {
+    if (totalSeconds < 60) {
+        return `${totalSeconds}s`;
+    }
+    const seconds = totalSeconds % 60;
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    if (totalMinutes < 60) {
+        return `${totalMinutes}m ${seconds}s`;
+    }
+    const minutes = totalMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    return `${hours}h ${minutes}m ${seconds}s`;
+};
+
 const retryText = retryAt =>
-    `Retrying in ${Math.max(0, Math.ceil((retryAt - Date.now()) / 1000))}s`;
+    `Retrying in ${formatDuration(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)))}`;
 
 setInterval(() => {
     for (const td of document.querySelectorAll('td[data-retry-at]')) {
