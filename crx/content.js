@@ -1,4 +1,8 @@
 (() => {
+  const BASE_DELAY_SECONDS = 5;
+  const MAX_DELAY_SECONDS = 300;
+  const CONCURRENCY = 6;
+
   const companies = Object.fromEntries(
     [...document.querySelectorAll('.swiper-slide a.mb-4')].flatMap(a => {
       const count = parseInt(a.querySelector('span span:last-child').textContent, 10);
@@ -32,26 +36,7 @@
         skip: $skip
         version: $version
       ) {
-        questions {
-          difficulty
-          id
-          paidOnly
-          questionFrontendId
-          status
-          title
-          titleSlug
-          translatedTitle
-          isInMyFavorites
-          frequency
-          acRate
-          topicTags {
-            name
-            nameTranslated
-            slug
-          }
-        }
         totalLength
-        hasMore
       }
     }
     `;
@@ -98,7 +83,7 @@
             topicSlugs: []
           }
         },
-        limit: 100,
+        limit: 1,
         searchKeyword: '',
         skip: 0,
         sortBy: {
@@ -174,18 +159,38 @@
   }
 
   function scheduleRetry(company, period, delaySeconds) {
-    companies[company][period] = { retryAt: Date.now() + delaySeconds * 1000 };
+    // Jitter ±20% so the many parallel retries don't fire in lockstep.
+    const jitteredDelay = delaySeconds * (0.8 + 0.4 * Math.random());
+    const nextDelay = Math.min(2 * delaySeconds, MAX_DELAY_SECONDS);
+
+    companies[company][period] = { retryAt: Date.now() + jitteredDelay * 1000 };
 
     sendUpdate();
 
-    setTimeout(() => updateProblemCounts(company, period, 2 * delaySeconds), delaySeconds * 1000);
+    setTimeout(() => updateProblemCounts(company, period, nextDelay), jitteredDelay * 1000);
   }
 
   sendUpdate();
 
+  const tasks = [];
   for (const company of Object.keys(companies)) {
     for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months']) {
-      updateProblemCounts(company, period, 5);
+      tasks.push([company, period]);
     }
+  }
+
+  // Drain the initial fan-out through a fixed-size pool so we don't fire
+  // hundreds of requests at once. Retries are scheduled separately (and are
+  // jittered/capped), so they stay outside the pool.
+  let nextTask = 0;
+  const worker = async () => {
+    while (nextTask < tasks.length) {
+      const [company, period] = tasks[nextTask++];
+      await updateProblemCounts(company, period, BASE_DELAY_SECONDS);
+    }
+  };
+
+  for (let i = 0; i < CONCURRENCY; i++) {
+    worker();
   }
 })();

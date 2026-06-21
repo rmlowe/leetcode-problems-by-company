@@ -19,7 +19,7 @@ setInterval(() => {
     for (const td of document.querySelectorAll('td[data-retry-at]')) {
         td.textContent = retryText(parseInt(td.dataset.retryAt, 10));
     }
-}, 250);
+}, 1000);
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const columns = [
