@@ -101,6 +101,8 @@
         body: JSON.stringify(value)
       });
 
+    // If rate-limiting returns, check response.ok here and honor the
+    // Retry-After header on 429 instead of relying on blind backoff.
     const json = await response.json();
 
     return json.data.favoriteQuestionList.totalLength;
