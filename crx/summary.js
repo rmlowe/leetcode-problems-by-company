@@ -17,6 +17,11 @@ const retryText = retryAt =>
 
 const FETCHED_PERIODS = ['thirty-days', 'three-months', 'six-months', 'more-than-six-months'];
 
+// Minimum all-time count before we show the recent-intensity ratio. Below this
+// the ratio is dominated by small-sample noise (one problem entering the
+// 6-month window swings it wildly), so we show "—" instead.
+const MIN_FOR_INTENSITY = 20;
+
 const updateProgress = companies => {
     let done = 0;
     for (const company of companies) {
@@ -53,7 +58,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         { displayName: '3 months', key: 'three-months', numeric: true },
         { displayName: '6 months', key: 'six-months', numeric: true },
         { displayName: 'More than 6 months', key: 'more-than-six-months', numeric: true },
-        { displayName: 'All', key: 'all', numeric: true }
+        { displayName: 'All', key: 'all', numeric: true },
+        // Derived: share of the company's all-time problems asked in the last
+        // 6 months (the windows are cumulative, so six-months is a subset of
+        // all). High = interview activity concentrated recently.
+        { displayName: 'Recent (6mo)', derived: true, numeric: true }
     ];
     const element = (tagName, nodes, className, attrs) => {
         const result = document.createElement(tagName);
@@ -74,6 +83,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         element('thead', [element('tr', columns.map(column => element('th', [column.displayName], 'text-center')))]),
         element('tbody', request.map(company =>
             element('tr', columns.map(column => {
+                if (column.derived) {
+                    const recent = company['six-months'];
+                    const all = company['all'];
+                    if (!(recent && recent.value !== undefined && all && all.value !== undefined)) {
+                        return element('td', ["…"], "text-center text-muted");
+                    }
+                    if (all.value < MIN_FOR_INTENSITY) {
+                        return element('td', ["—"], "text-center text-muted");
+                    }
+                    return element('td', [`${Math.round(100 * recent.value / all.value)}%`], className(column));
+                }
+
                 const obj = company[column.key];
 
                 if (obj === undefined) {
