@@ -18,6 +18,11 @@ days / 3 months / 6 months / more than 6 months / all time), sourced from
 3. Watch the progress bar fill in. Cells show `…` while pending, a retry
    countdown if a request failed, and the count once loaded. When everything
    has settled the bar turns green and reads "All N companies loaded".
+4. Click any column header to sort by it (click again to reverse). The default
+   is **All** descending. The **Recent (6mo)** column shows what share of a
+   company's all-time problems were asked in the last 6 months — a rough
+   size-normalized "active recently" signal, shown only for companies with
+   enough volume to be meaningful.
 
 ## How it works
 
@@ -25,8 +30,9 @@ days / 3 months / 6 months / more than 6 months / all time), sourced from
   the page, then queries LeetCode's GraphQL API once per company × window for the
   problem count, posting results to the summary tab via `chrome.runtime.sendMessage`.
 - **summary.js** receives those messages and (re)renders the table and progress
-  bar. The two communicate through a simple per-cell state: a `{value}` once
-  loaded, a `{retryAt}` while a retry is pending, or absent while still in flight.
+  bar, and owns ordering (click-to-sort). The two communicate through a simple
+  per-cell state: a `{value}` once loaded, a `{retryAt}` while a retry is
+  pending, or absent while still in flight.
 - **background.js** activates the toolbar icon on the problemset page and, on
   click, opens the summary tab and injects the content script.
 

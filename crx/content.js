@@ -108,33 +108,10 @@
     return json.data.favoriteQuestionList.totalLength;
   }
 
-  const compareFunction =
-    (company1, company2) => {
-      for (const period of ['thirty-days', 'three-months', 'six-months', 'more-than-six-months', 'all']) {
-        const obj1 = company1[period];
-        const obj2 = company2[period];
-
-        if (obj1 !== undefined && obj2 !== undefined) {
-          const value1 = obj1.value;
-          const value2 = obj2.value;
-
-          if (value1 !== undefined && value2 !== undefined) {
-            const diff = value2 - value1;
-
-            if (diff !== 0) {
-              return diff;
-            }
-          }
-        }
-      }
-
-      return 0;
-    }
-
+  // Ordering is owned by the summary tab (it supports click-to-sort), so we
+  // just send the companies in scraped order.
   const sendUpdate = () => {
-    const message = Object.values(companies);
-    message.sort(compareFunction);
-    chrome.runtime.sendMessage(message);
+    chrome.runtime.sendMessage(Object.values(companies));
   };
 
   let calls = 0;
