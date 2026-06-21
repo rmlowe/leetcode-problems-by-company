@@ -15,6 +15,31 @@ const formatDuration = totalSeconds => {
 const retryText = retryAt =>
     `Retrying in ${formatDuration(Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)))}`;
 
+const FETCHED_PERIODS = ['thirty-days', 'three-months', 'six-months', 'more-than-six-months'];
+
+const updateProgress = companies => {
+    let done = 0;
+    for (const company of companies) {
+        for (const period of FETCHED_PERIODS) {
+            if (company[period] && company[period].value !== undefined) {
+                done++;
+            }
+        }
+    }
+    const total = companies.length * FETCHED_PERIODS.length;
+    const complete = total > 0 && done === total;
+
+    document.querySelector('#progress-label').textContent =
+        complete ? `All ${companies.length} companies loaded` : `Loaded ${done} of ${total}`;
+
+    const bar = document.querySelector('#progress-bar');
+    bar.style.width = `${total > 0 ? Math.round(100 * done / total) : 0}%`;
+    bar.classList.toggle('bg-success', complete);
+    // Stop the animated stripes once everything has settled.
+    bar.classList.toggle('progress-bar-striped', !complete);
+    bar.classList.toggle('progress-bar-animated', !complete);
+};
+
 setInterval(() => {
     for (const td of document.querySelectorAll('td[data-retry-at]')) {
         td.textContent = retryText(parseInt(td.dataset.retryAt, 10));
@@ -42,6 +67,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return result;
     };
     const className = column => column.numeric ? "text-right" : "text-left";
+    updateProgress(request);
     const table = document.querySelector('table');
     table.innerHTML = '';
     table.append(
@@ -51,7 +77,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const obj = company[column.key];
 
                 if (obj === undefined) {
-                    return element('td', "", "text-center");
+                    return element('td', ["…"], "text-center text-muted");
                 }
 
                 const value = obj.value;
